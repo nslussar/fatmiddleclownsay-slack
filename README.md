@@ -3,11 +3,11 @@
 A Slack `/clownsay` slash command. Turns text into a clown-bookended emoji banner.
 
 ```
-/clownsay hey
-→ :fat_left_clown::mch::mce::mcy::fat_right_clown:
+/clownsay hey there
+→ :fat_left_clown::mch::mce::mcy::middle_clown::mct::mch::mce::mcr::mce::fat_right_clown:
 ```
 
-Each word gets its own pair of bookends. Letters become `:mc<letter>:` emojis (lowercase a–z), non-letters are dropped.
+A single banner wraps the whole phrase. Letters become `:mc<letter>:` emojis (lowercase a–z), non-letters are dropped, and `:middle_clown:` separates words.
 
 ## Stack
 
@@ -44,6 +44,7 @@ Each workspace needs these custom emoji uploaded:
 
 - `:fat_left_clown:` — left bookend
 - `:fat_right_clown:` — right bookend
+- `:middle_clown:` — separator between words
 - `:mca:` through `:mcz:` — one per letter
 
 Without them, output renders as literal `:mca:` text instead of images.

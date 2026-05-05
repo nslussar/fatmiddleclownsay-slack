@@ -23,11 +23,11 @@ Step 5 is intentional. Replying inline with `{response_type: "in_channel"}` caus
 - Input is lowercased
 - Split on whitespace (any run of whitespace collapses to one separator)
 - For each word: each `a–z` character becomes `:mc<letter>:`, non-letters are dropped
-- Each word wraps with `:fat_left_clown:` … `:fat_right_clown:`
-- Words that have zero letters after filtering are dropped entirely (so `!!!` doesn't produce empty bookends)
-- Words rejoin with single spaces
+- Words with no surviving letters are dropped entirely (so `!!!` doesn't produce a bare banner)
+- Surviving words are joined with `:middle_clown:`
+- The whole banner is wrapped with `:fat_left_clown:` … `:fat_right_clown:`
 
-Example: `Hello, World!` → `:fat_left_clown::mch::mce::mcl::mcl::mco::fat_right_clown: :fat_left_clown::mcw::mco::mcr::mcl::mcd::fat_right_clown:`
+Example: `Hello, World!` → `:fat_left_clown::mch::mce::mcl::mcl::mco::middle_clown::mcw::mco::mcr::mcl::mcd::fat_right_clown:`
 
 ## Required emoji pack
 
@@ -35,6 +35,7 @@ Each workspace's emoji library must contain:
 
 - `:fat_left_clown:` — left bookend
 - `:fat_right_clown:` — right bookend
+- `:middle_clown:` — separator between words inside a banner
 - `:mca:` through `:mcz:` — one per English letter
 
 Emoji are workspace-scoped in Slack and there's no API to bulk-install them on Free/Pro/Business+ plans, so this is a manual step per workspace. Without the pack, Slack renders the literal `:mca:` text instead of images.
@@ -89,7 +90,7 @@ npx wrangler secret delete SLACK_SIGNING_SECRET_<N>
 - **Make output private** (only the invoker sees it): change `response_type: "in_channel"` to `"ephemeral"` in the `response_url` POST. Note that ephemeral messages do not persist in channel history.
 - **Pass non-letter characters through literally** (so `don't` keeps the apostrophe between emoji): change `return ""` to `return ch` in the per-character transform.
 - **Disable case-folding**: remove the `.toLowerCase()` call. Only useful if you also upload uppercase emoji variants like `:mcA:`.
-- **Change which workspaces the command bookends per word vs. per phrase**: the per-word bookending is in the `.split(/\s+/).map(...)` block; collapsing to a single bookend pair around the whole text means joining all letters first and wrapping once.
+- **Change which workspaces the command bookends per word vs. per phrase**: words currently join with `:middle_clown:` inside a single `:fat_left_clown:`…`:fat_right_clown:` pair. To bookend each word separately instead, wrap each word in the `.map(...)` step and join the resulting words with `" "`.
 
 ## What's intentionally not here
 

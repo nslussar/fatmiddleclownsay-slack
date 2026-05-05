@@ -71,20 +71,23 @@ export default {
     const params = new URLSearchParams(body);
     const text = params.get("text") || "";
 
-    // 3. Transform: each word becomes :fat_left_clown:<letters>:fat_right_clown:,
-    //    where <letters> is :mc<letter>: per a–z. Non-letters inside a word are
-    //    dropped; words with no surviving letters are dropped entirely.
-    const output = text
+    // 3. Transform: lowercase, split on whitespace, convert each letter to
+    //    :mc<letter>:, drop non-letters, drop words with no surviving letters,
+    //    join words with :middle_clown:, then wrap the whole banner with
+    //    :fat_left_clown: … :fat_right_clown:.
+    const words = text
       .toLowerCase()
       .split(/\s+/)
-      .map((word) => {
-        const letters = [...word]
+      .map((word) =>
+        [...word]
           .map((ch) => (ch >= "a" && ch <= "z" ? `:mc${ch}:` : ""))
-          .join("");
-        return letters ? `:fat_left_clown:${letters}:fat_right_clown:` : "";
-      })
-      .filter((w) => w.length > 0)
-      .join(" ");
+          .join(""),
+      )
+      .filter((w) => w.length > 0);
+
+    const output = words.length
+      ? `:fat_left_clown:${words.join(":middle_clown:")}:fat_right_clown:`
+      : "";
 
     // 4. Respond.
     //
