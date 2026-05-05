@@ -7,6 +7,14 @@
  *   3. npx wrangler secret put SLACK_SIGNING_SECRET   (paste from Slack app's Basic Information)
  *   4. npx wrangler deploy
  *   5. Use the deployed URL as the Request URL in your Slack slash command config.
+ *
+ * Adding more workspaces:
+ *   Each Slack workspace gets its own Slack app (and therefore its own signing
+ *   secret). Add additional secrets with any name starting with
+ *   SLACK_SIGNING_SECRET, e.g.:
+ *     npx wrangler secret put SLACK_SIGNING_SECRET_2
+ *     npx wrangler secret put SLACK_SIGNING_SECRET_3
+ *   then redeploy. The Worker will accept any request signed with any of them.
  */
 
 export default {
@@ -31,12 +39,30 @@ export default {
       return new Response("Request too old", { status: 401 });
     }
 
-    const ok = await verifySlackSignature(
-      env.SLACK_SIGNING_SECRET,
-      timestamp,
-      body,
-      signature,
-    );
+    // Collect every configured signing secret. Any env var whose name starts
+    // with SLACK_SIGNING_SECRET counts — one per workspace's Slack app.
+    const secrets = Object.entries(env)
+      .filter(
+        ([k, v]) =>
+          k.startsWith("SLACK_SIGNING_SECRET") &&
+          typeof v === "string" &&
+          v.length > 0,
+      )
+      .map(([, v]) => v);
+
+    if (secrets.length === 0) {
+      return new Response("Server misconfigured: no signing secrets", {
+        status: 500,
+      });
+    }
+
+    let ok = false;
+    for (const secret of secrets) {
+      if (await verifySlackSignature(secret, timestamp, body, signature)) {
+        ok = true;
+        break;
+      }
+    }
     if (!ok) {
       return new Response("Invalid signature", { status: 401 });
     }
