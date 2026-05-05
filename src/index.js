@@ -86,12 +86,26 @@ export default {
       .filter((w) => w.length > 0)
       .join(" ");
 
-    // response_type "in_channel" means everyone in the channel sees it.
-    // Switch to "ephemeral" if you'd rather only the invoker sees it.
-    return Response.json({
-      response_type: "in_channel",
-      text: output,
-    });
+    // 4. Respond.
+    //
+    // We don't reply with `{response_type: "in_channel", text: ...}` directly,
+    // because Slack would echo the user's "/clownsay hey" invocation in the
+    // channel alongside our response. Instead we ack with an empty 200 and
+    // POST the actual message to response_url — that delivers the same
+    // in-channel message *without* the command echoed above it.
+    const responseUrl = params.get("response_url");
+    if (responseUrl) {
+      await fetch(responseUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          response_type: "in_channel",
+          text: output,
+        }),
+      });
+    }
+
+    return new Response("", { status: 200 });
   },
 };
 
