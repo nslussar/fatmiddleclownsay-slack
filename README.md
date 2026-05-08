@@ -4,6 +4,8 @@ A Slack `/clownsay` slash command. Turns text into a clown-bookended emoji banne
 
 <img src="docs/screenshot.png" alt="clownsay in action" width="800">
 
+Behind the scenes it just outputs a bunch of :slacmojis: (see emoji pack below):
+
 ```
 /clownsay hey there
 → :fat_left_clown::mch::mce::mcy::middle_clown::mct::mch::mce::mcr::mce::fat_right_clown:
@@ -17,22 +19,38 @@ A single-file Cloudflare Worker at `src/index.js`. No framework, no build step. 
 
 ## Initial deploy
 
-Requires a Cloudflare account and Node.js.
+Prerequisites: Node.js, and a Cloudflare account.
 
-```bash
-npx wrangler login                                # one-time
-npx wrangler secret put SLACK_SIGNING_SECRET      # paste from Slack app's Basic Information
-npx wrangler deploy
-```
-
-`wrangler deploy` prints the Worker URL. Paste it into the Slack app's slash command Request URL field, then install the app to the workspace.
+1. **Set up Cloudflare.** Sign up at https://dash.cloudflare.com/sign-up (the free plan covers this Worker comfortably). On first deploy you'll be prompted to register a `*.workers.dev` subdomain — pick anything; the Worker's URL will be `fatmiddleclownsay-slack.<your-subdomain>.workers.dev`. Optionally edit `name` in `wrangler.jsonc` if you want a different Worker name. Then authorize wrangler against your account:
+   ```bash
+   npx wrangler login    # opens a browser
+   ```
+2. **Create a Slack app.** Go to https://api.slack.com/apps → **Create New App** → **From scratch**. Pick the workspace you want it installed in.
+3. **Copy the Signing Secret** from the app's **Basic Information** page (under *App Credentials*).
+4. **Deploy the Worker** with that secret:
+   ```bash
+   npx wrangler secret put SLACK_SIGNING_SECRET    # paste the Signing Secret
+   npx wrangler deploy
+   ```
+   `wrangler deploy` prints the Worker URL — copy it.
+5. **Add the slash command.** In the Slack app, go to **Slash Commands** → **Create New Command**:
+   - Command: `/clownsay`
+   - Request URL: the Worker URL from step 4
+   - Short description: anything (e.g. *Clown-bookend some text*)
+6. **Add bot scopes.** Go to **OAuth & Permissions** → **Scopes** → **Bot Token Scopes** and add `commands`.
+7. **Install the app** to the workspace from **Install App** (or **OAuth & Permissions** → **Install to Workspace**).
+8. **Upload the emoji pack** (see below).
+9. Try `/clownsay hello` in any channel.
 
 ## Adding another workspace
 
-1. Create a new Slack app at https://api.slack.com/apps (From scratch).
-2. Add a `/clownsay` slash command pointing at the same Worker URL.
-3. Copy the new app's Signing Secret.
-4. ```bash
+One Worker can serve many workspaces — each gets its own Slack app and signing secret.
+
+1. Create a new Slack app at https://api.slack.com/apps (**From scratch**, pick the new workspace).
+2. Add a `/clownsay` slash command pointing at the **same Worker URL** as the first install.
+3. Add the `commands` bot scope.
+4. Copy the new app's Signing Secret and register it under a new env var name:
+   ```bash
    npx wrangler secret put SLACK_SIGNING_SECRET_2
    npx wrangler deploy
    ```
