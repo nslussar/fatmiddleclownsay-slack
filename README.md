@@ -2,7 +2,7 @@
 
 A Slack `/clownsay` slash command. Turns text into a clown-bookended emoji banner.
 
-<img src="docs/screenshot.png" alt="clownsay in action" width="200">
+<img src="docs/screenshot.png" alt="clownsay in action" width="800">
 
 ```
 /clownsay hey there
