@@ -2,6 +2,8 @@
 
 A Slack `/clownsay` slash command. Turns text into a clown-bookended emoji banner.
 
+<img src="docs/screenshot.png" alt="clownsay in action" width="200">
+
 ```
 /clownsay hey there
 → :fat_left_clown::mch::mce::mcy::middle_clown::mct::mch::mce::mcr::mce::fat_right_clown:
@@ -47,7 +49,12 @@ Each workspace needs these custom emoji uploaded:
 - `:middle_clown:` — separator between words
 - `:mca:` through `:mcz:` — one per letter
 
-Without them, output renders as literal `:mca:` text instead of images.
+The image files are in `emoji_pack/`. Without them, output renders as literal `:mca:` text instead of images.
+
+Slack has no bulk-upload API on Free/Pro/Business+ plans, so use a Chrome extension to upload the pack:
+
+- [Neutral Face Emoji Tools](https://chromewebstore.google.com/detail/neutral-face-emoji-tools/anchoacphlfbdomdlomnbbfhcmcdmjej)
+- [Slack Custom Emoji Manager](https://chromewebstore.google.com/detail/slack-custom-emoji-manage/cgipifjpcbhdppbjjphmgkmmgbeaggpc)
 
 ## Iterating
 
